@@ -3664,8 +3664,15 @@ class Calculation
                             $val = $rangeWS2 . $endRowColRef . $val;
                         } elseif ((ctype_alpha($startRowColRef)) && (ctype_alpha($val)) &&
                             (strlen($startRowColRef) <= 3) && (strlen($val) <= 3)) {
-                            //    Column range
-                            $endRowColRef = ($pCellParent !== null) ? $pCellParent->getHighestRow() : 1048576; //    Max 1,048,576 rows for Excel2007
+                            //   Column range
+                            $refSheet = $pCellParent;
+
+                            // see https://github.com/PHPOffice/PhpSpreadsheet/issues/1215
+                            $rangeSheetName = \str_replace('!', '', $rangeWS1);
+                            if ($rangeSheetName !== $pCellParent->getTitle()) {
+                                $refSheet = $pCell->getWorksheet()->getParent()->getSheetByName($rangeSheetName);
+                            }
+                            $endRowColRef = ($pCellParent !== null) ? $refSheet->getHighestRow() : 1048576; //    Max 1,048,576 rows for Excel2007
                             $output[count($output) - 1]['value'] = $rangeWS1 . strtoupper($startRowColRef) . '1';
                             $val = $rangeWS2 . $val . $endRowColRef;
                         }
